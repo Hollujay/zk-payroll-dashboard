@@ -266,11 +266,26 @@ function TransactionHistoryInner({
     () => filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
     [filtered, safePage],
   );
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const isFirstPageRender = useRef(true);
 
   // Reset to page 1 whenever the filtered result set changes shape.
   useEffect(() => {
     setCurrentPage(1);
   }, [filters, mode]);
+
+  // Scroll (and move focus for screen-reader users) back to the top of the
+  // list on every page change, since Prev/Next live at the bottom of a list
+  // that can be much taller than the viewport — otherwise the click leaves
+  // you scrolled past the rows that just changed underneath you.
+  useEffect(() => {
+    if (isFirstPageRender.current) {
+      isFirstPageRender.current = false;
+      return;
+    }
+    sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    sectionRef.current?.focus({ preventScroll: true });
+  }, [safePage]);
 
   const activeFilterCount = [
     !!filters.search.trim(),
@@ -343,7 +358,11 @@ function TransactionHistoryInner({
   );
 
   return (
-    <section aria-labelledby="transaction-history-heading">
+    <section
+      ref={sectionRef}
+      aria-labelledby="transaction-history-heading"
+      tabIndex={-1}
+    >
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
         {/* Header bar */}
         <div className="px-4 sm:px-6 py-4 border-b flex items-center justify-between gap-2">
