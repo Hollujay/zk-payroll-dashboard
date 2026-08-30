@@ -8,6 +8,7 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import TreasuryReadinessChecklist from "./TreasuryReadinessChecklist";
 import TreasuryDrainWarning from "./TreasuryDrainWarning";
 import FundingImbalanceDashboard from "./FundingImbalanceDashboard";
+import ReservationExpiryWarning from "./ReservationExpiryWarning";
 import ReservationToastListener from "./ReservationToastListener";
 import { createFundingReservation } from "@/lib/events/reservationEvents";
 import SupportedAssetsEmptyState from "@/components/features/assets/SupportedAssetsEmptyState";
@@ -114,6 +115,8 @@ function TreasuryView({ configuredAssets }: { configuredAssets?: Array<{ code: s
       <FundingImbalanceDashboard />
 
       <TreasuryReadinessChecklist />
+
+      <ReservationExpiryWarning />
 
       <FundingForecast />
 
