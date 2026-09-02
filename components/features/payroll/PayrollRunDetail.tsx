@@ -423,6 +423,14 @@ export default function PayrollRunDetail({ run: propRun, proofReference }: Payro
         >
           View transaction history
         </Link>
+        {run.status === "verified" && (
+          <Link
+            href={`/payroll/receipts/${run.id}`}
+            className="inline-flex items-center px-4 py-2 rounded-md border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            View Receipt
+          </Link>
+        )}
       </div>
     </section>
   );
