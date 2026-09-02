@@ -963,7 +963,7 @@ export const MOCK_PAYROLL_DISPUTES: PayrollDispute[] = [
     resolutionAction: "Reconciled with supervisor timesheet.",
     createdAt: "2025-04-01T10:00:00Z",
   },
-];
+] as PayrollDispute[];
 
 export const MOCK_FUNDING_RESERVATIONS: FundingReservation[] = [
   {
