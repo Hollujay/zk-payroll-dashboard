@@ -32,12 +32,7 @@ import {
   RUN_KIND_STYLES,
 } from "@/lib/payroll/scheduleUtils";
 import ReconciliationDiffPanel from "@/components/features/payroll/ReconciliationDiffPanel";
-import BatchRootComparison from "@/components/features/reconciliation/BatchRootComparison";
-import { useReconciliationStore, computeBatchRootStatus } from "@/stores/reconciliation";
-import { PayrollCancellationPanel } from "@/components/features/payroll/PayrollCancellationPanel";
-import { ApprovalExpiryBadge } from "@/components/signing/ApprovalExpiryBadge";
-import { MissingProofWarning, ExpiredProofWarning } from "@/components/features/proofs/MissingProofWarning";
-
+import CancelPayrollDialog from "./CancelPayrollDialog";
 
 
 
@@ -97,6 +92,7 @@ export default function PayrollRunDetail({ run: propRun, proofReference }: Payro
   const runId = params?.id as string;
 
   const [isLoading, setIsLoading] = useState(!propRun);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
 
   useEffect(() => {
     if (propRun) {
@@ -280,32 +276,34 @@ export default function PayrollRunDetail({ run: propRun, proofReference }: Payro
               </div>
             </div>
           </div>
-          {kind === "scheduled" && freshness.state === "missing" && (
-            <span
-              data-testid="execution-blocked-missing-proof"
-              role="alert"
-              className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-amber-100 text-amber-800 border border-amber-200 text-sm font-medium cursor-not-allowed shrink-0"
-            >
-              Execution blocked — proof missing
-            </span>
-          )}
-          {kind === "scheduled" && !freshness.blocksExecution && freshness.state !== "missing" && freshness.state !== "expired" && !lockState && (
-            <Link
-              href="/payroll/execute"
-              className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors shrink-0"
-            >
-              Process payroll
-            </Link>
-          )}
-          {kind === "scheduled" && freshness.blocksExecution && (
-            <span
-              data-testid="execution-blocked-by-proof"
-              role="alert"
-              className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-gray-100 text-gray-500 text-sm font-medium cursor-not-allowed shrink-0"
-            >
-              Execution blocked — proof expired
-            </span>
-          )}
+          <div className="flex items-center gap-2 shrink-0">
+            {kind === "scheduled" && !lockState && !freshness.blocksExecution && (
+              <Link
+                href="/payroll/execute"
+                className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors"
+              >
+                Process payroll
+              </Link>
+            )}
+            {run.status === "pending" && (
+              <button
+                type="button"
+                onClick={() => setIsCancelDialogOpen(true)}
+                className="inline-flex items-center justify-center px-4 py-2 rounded-md border border-red-300 text-red-700 bg-white text-sm font-medium hover:bg-red-50 transition-colors"
+              >
+                Cancel Batch
+              </button>
+            )}
+            {kind === "scheduled" && !lockState && freshness.blocksExecution && (
+              <span
+                data-testid="execution-blocked-by-proof"
+                role="alert"
+                className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-gray-100 text-gray-500 text-sm font-medium cursor-not-allowed"
+              >
+                Execution blocked — proof expired
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Approval expiry badge — visible before execution */}
@@ -313,6 +311,18 @@ export default function PayrollRunDetail({ run: propRun, proofReference }: Payro
           <ApprovalExpiryBadge approval={approvalInput} />
         </div>
       </header>
+
+      {isCancelDialogOpen && run && (
+        <CancelPayrollDialog
+          isOpen={isCancelDialogOpen}
+          payroll={run}
+          onCancel={() => setIsCancelDialogOpen(false)}
+          onSuccess={() => {
+            setIsCancelDialogOpen(false);
+            router.refresh();
+          }}
+        />
+      )}
 
       {/* Run metadata */}
       <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
