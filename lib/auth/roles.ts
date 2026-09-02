@@ -11,7 +11,7 @@ export type NavigationAccess = 'enabled' | 'disabled';
 export interface NavigationItem {
   label: string;
   href: string;
-  icon: 'home' | 'users' | 'play' | 'history' | 'archive' | 'shield' | 'building' | 'treasury' | 'settings' | 'file-search' | 'alert' | 'clipboard' | 'upload' | 'calendar' | 'download';
+  icon: 'home' | 'users' | 'play' | 'history' | 'archive' | 'shield' | 'building' | 'treasury' | 'settings' | 'file-search' | 'alert' | 'clipboard' | 'upload' | 'calendar' | 'download' | 'gavel';
   roles: UserRole[];
   access?: Partial<Record<UserRole, NavigationAccess>>;
   disabledReason?: Partial<Record<UserRole, string>>;
@@ -39,10 +39,22 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     roles: ['admin', 'operator'],
   },
   {
+    label: 'Obligation Snapshots',
+    href: '/payroll/snapshots',
+    icon: 'file-search',
+    roles: ['admin', 'operator'],
+  },
+  {
     label: 'Execute Payroll',
     href: '/payroll/execute',
     icon: 'play',
     roles: ['admin', 'operator'],
+  },
+  {
+    label: 'Verify Proof',
+    href: '/payroll/verify',
+    icon: 'shield',
+    roles: ['admin', 'operator', 'auditor'],
   },
   {
     label: 'History',
@@ -83,6 +95,24 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     roles: ['admin'],
   },
   {
+    label: 'Switch Company',
+    href: '/company/switch',
+    icon: 'building',
+    roles: ['admin'],
+  },
+  {
+    label: 'Reconciliation Inspector',
+    href: '/payroll/reconciliation',
+    icon: 'file-search',
+    roles: ['admin', 'operator', 'auditor'],
+  },
+  {
+    label: 'Signing Recovery',
+    href: '/wallet/recovery',
+    icon: 'alert',
+    roles: ['admin', 'operator'],
+  },
+  {
     label: 'Settings',
     href: '/settings',
     icon: 'settings',
@@ -94,7 +124,9 @@ export const ROUTE_ROLE_RULES: Array<{ prefix: string; roles: UserRole[] }> = [
   { prefix: '/employees/add', roles: ['admin'] },
   { prefix: '/employees', roles: ['admin', 'operator'] },
   { prefix: '/payroll/approvals', roles: ['admin', 'operator'] },
+  { prefix: '/payroll/snapshots', roles: ['admin', 'operator'] },
   { prefix: '/payroll/execute', roles: ['admin', 'operator'] },
+  { prefix: '/payroll/verify', roles: ['admin', 'operator', 'auditor'] },
   { prefix: '/payroll/run', roles: ['admin'] },
   { prefix: '/payroll/exceptions', roles: ['admin', 'operator', 'auditor'] },
   { prefix: '/payroll/runs', roles: ['admin', 'operator', 'auditor'] },
@@ -102,10 +134,17 @@ export const ROUTE_ROLE_RULES: Array<{ prefix: string; roles: UserRole[] }> = [
   { prefix: '/treasury', roles: ['admin'] },
   { prefix: '/compliance', roles: ['admin', 'auditor'] },
   { prefix: '/setup', roles: ['admin'] },
+  { prefix: '/company/switch', roles: ['admin'] },
+  { prefix: '/payroll/reconciliation', roles: ['admin', 'operator', 'auditor'] },
+  { prefix: '/wallet/recovery', roles: ['admin', 'operator'] },
+  { prefix: '/archive', roles: ['admin', 'operator', 'auditor'] },
   { prefix: '/history/archived', roles: ['admin', 'operator', 'auditor'] },
   { prefix: '/history', roles: ['admin', 'operator', 'auditor'] },
   { prefix: '/exports', roles: ['admin', 'operator', 'auditor'] },
+  { prefix: '/settings/payroll-policy', roles: ['admin'] },
+  { prefix: '/settings/roles', roles: ['admin'] },
   { prefix: '/settings', roles: ['admin', 'operator', 'auditor'] },
+
   { prefix: '/dashboard', roles: ['admin', 'operator', 'auditor'] },
   { prefix: '/incidents', roles: ['admin', 'operator', 'auditor'] },
   { prefix: '/admin', roles: ['admin'] },

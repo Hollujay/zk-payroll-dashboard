@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Key,
   Plus,
@@ -25,6 +25,7 @@ import AuditActivityFeed from "./AuditActivityFeed";
 import type { ViewKey } from "@/types";
 import AuditExportRequest from "./AuditExportRequest";
 import ComplianceEvidenceBundleView from "./ComplianceEvidenceBundleView";
+import { AuditReadyTimeline } from "@/components/features/payroll/AuditReadyTimeline";
 import type { AuditAccessRequest } from "@/types/models";
 
 function generateKeyId(): string {
@@ -39,7 +40,7 @@ function generateKeyId(): string {
 function ComplianceManager() {
   const { viewKeys, addViewKey, revokeViewKey, setViewKeys } =
     useViewKeyStore();
-  const [activeTab, setActiveTab] = useState<"access" | "exports" | "bundles">("access");
+  const [activeTab, setActiveTab] = useState<"access" | "exports" | "bundles" | "timeline">("access");
   const {
     requests,
     setRequests,
@@ -51,7 +52,6 @@ function ComplianceManager() {
   } = useAuditRequestStore();
   const { addActivity } = useAuditActivityStore();
   
-  const [initialized, setInitialized] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [revealedKeys, setRevealedKeys] = useState<Set<string>>(new Set());
   const [form, setForm] = useState({
@@ -62,11 +62,11 @@ function ComplianceManager() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [preparingId, setPreparingId] = useState<string | null>(null);
 
-  if (!initialized && (viewKeys.length === 0 || requests.length === 0)) {
+  useEffect(() => {
     if (viewKeys.length === 0) setViewKeys(MOCK_VIEW_KEYS);
     if (requests.length === 0) setRequests(MOCK_AUDIT_REQUESTS);
-    setInitialized(true);
-  }
+  }, [viewKeys.length, requests.length, setViewKeys, setRequests]);
+
 
   const handleApproveRequest = (request: AuditAccessRequest) => {
     const keyId = generateKeyId();
@@ -153,14 +153,14 @@ function ComplianceManager() {
 
     addActivity({
       id: `aud_act_${Date.now()}`,
-      action: "key_granted",
+      action: "auditor_assigned",
       actor: "Current Admin",
       actorOrg: "ZK Payroll Inc.",
       targetName: form.auditorName,
       targetOrg: form.auditorOrg,
       scope: form.scope,
       timestamp: new Date().toISOString(),
-      summary: `View key generated manually for ${form.auditorName} (${form.auditorOrg}).`,
+      summary: `Auditor assigned: access granted to ${form.auditorName} (${form.auditorOrg}).`,
     });
 
     setForm({ auditorName: "", auditorOrg: "", scope: "read-only" });
@@ -177,14 +177,14 @@ function ComplianceManager() {
     if (key) {
       addActivity({
         id: `aud_act_${Date.now()}`,
-        action: "key_revoked",
+        action: "auditor_removed",
         actor: "Current Admin",
         actorOrg: "ZK Payroll Inc.",
         targetName: key.auditorName,
         targetOrg: key.auditorOrg,
         scope: key.scope,
         timestamp: new Date().toISOString(),
-        summary: `View key for ${key.auditorName} (${key.auditorOrg}) revoked. Access immediately invalidated.`,
+        summary: `Auditor removed: access for ${key.auditorName} (${key.auditorOrg}) was immediately revoked.`,
       });
     }
     toast.success("View key revoked", {
@@ -389,6 +389,20 @@ function ComplianceManager() {
         >
           Audit Exports
           {activeTab === "exports" && (
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 animate-in fade-in slide-in-from-bottom-1" />
+          )}
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("timeline")}
+          className={`px-6 py-3 text-sm font-medium transition-colors relative ${
+            activeTab === "timeline"
+              ? "text-indigo-600 font-semibold"
+              : "text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          Audit Timeline
+          {activeTab === "timeline" && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 animate-in fade-in slide-in-from-bottom-1" />
           )}
         </button>
@@ -706,6 +720,8 @@ function ComplianceManager() {
         </div>
       ) : activeTab === "exports" ? (
         <AuditExportRequest />
+      ) : activeTab === "timeline" ? (
+        <AuditReadyTimeline />
       ) : (
         <ComplianceEvidenceBundleView />
       )}
